@@ -24,6 +24,13 @@ export default {
     apiKey: String,
     country: String,
     enableGeolocation: Boolean,
+    location: {
+      lat: Number,
+      long: Number,
+      radius: Number
+    },
+    strictBounds: Boolean,
+    radius: Number,
     enableGeocode: Boolean,
     value: String,
     version: String,
@@ -51,7 +58,24 @@ export default {
         this.autocomplete.componentRestrictions.country = newVal
       }
     },
-
+    location (newVal) {
+      if(newVal && this.autocomplete) {
+        const geolocation = {
+          lat: newVal.lat,
+          lng: newVal.long
+        }
+        const circle = new window.google.maps.Circle({
+          center: geolocation,
+          radius: newVal.radius
+        })
+        this.autocomplete.setBounds(circle.getBounds());
+      }
+    },
+    strictBounds (newVal) {
+      if(newVal && this.autocomplete) {
+          this.autocomplete.strictBounds = newVal;
+      }
+    },
     types (newVal) {
       if (newVal) {
         const types = Array.isArray(newVal) ? newVal : [newVal]
@@ -157,6 +181,22 @@ export default {
         options.componentRestrictions = {
           country: this.country
         }
+      }
+      if (this.location) {
+        const geolocation = {
+          lat: this.location.lat,
+          lng: this.location.long
+        }
+        const circle = new window.google.maps.Circle({
+          center: geolocation,
+          radius: this.location.radius
+        })
+
+        options.bounds = circle.getBounds();
+      }
+
+      if (this.strictBounds) {
+        options.strictBounds = this.strictBounds;
       }
 
       this.element = this.$el
